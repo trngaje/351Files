@@ -1,5 +1,7 @@
 # 351Files
-A single panel file Manager tailored for Anbernic 351 devices: RG351V and RG351P. Can be easily adapted to any Linux-based device.
+A single panel file Manager tailored for Anbernic 351 devices. Can be easily adapted to any Linux-based device.
+I changed it for use in odroid go ultra. It automatically recognizes and displays the screen size.
+Set the input value according to the SDL_GAMECONTROLLERCONFIG value.
 
 Based on DinguxCommander.
 * Original page: https://tardigrade-nx.github.io/2011/dinguxcommander
@@ -18,12 +20,6 @@ Based on DinguxCommander.
 * Text file viewer
 * Text file editor
 * Image viewer (original size or fit screen, next / previous image)
-
-# Installation on 351ELEC:
-351Files is now integrated in 351ELEC by default.
-
-# Installation on ArkOS:
-351Files is now integrated in ArkOS by default.
 
 # Buttons:
 * d-pad: move
@@ -51,6 +47,11 @@ Text editor:
 Define the following variables when executing 'make':
 * CC
 * SDL2_CONFIG
-* DEVICE: CHI / RG351P / RG351V / RGB10 / RK2020 / PC
+* DEVICE: CHI / RG351P / RG351V / RGB10 / RK2020 / PC / OGU
 * START_PATH
 * RES_PATH
+
+In order to build on odroid go ultra :
+
+    ./build_ogu.sh
+

@@ -5,13 +5,17 @@
 
 //------------------------------------------------------------------------------
 
+int g_screen_width;
+int g_screen_height;
+SDL_GameController *sdl_cntrl=NULL;
+
 // Init SDL
 bool SDLUtils::init()
 {
    INHIBIT(std::cout << "SDLUtils::Init()" << std::endl;)
 
    // Initialize SDL
-   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0)
+   if (SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0)
    {
       std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
       return false;
@@ -45,11 +49,47 @@ bool SDLUtils::init()
       INHIBIT(std::cout << "SDL_JoystickOpen OK" << std::endl;)
    }
 
+    if (sdl_cntrl != NULL && !SDL_GameControllerGetAttached(sdl_cntrl)) {
+        SDL_GameControllerClose(sdl_cntrl);
+        sdl_cntrl = NULL;
+    }
+    if (sdl_cntrl == NULL) {
+        for (int i = 0; i < SDL_NumJoysticks(); i++) {
+			const char *name = SDL_GameControllerNameForIndex(i);
+			if (name) {
+				printf("[trngaje]Joystick %i has game controller name '%s'\n", i, name);
+			} else {
+				printf("[trngaje] Joystick %i has no game controller name.\n", i);
+			}			
+            if (SDL_IsGameController(i)) {
+                sdl_cntrl = SDL_GameControllerOpen(i);
+                if (sdl_cntrl != NULL) {
+					printf("[trngaje] success\n");
+                    break;
+                }
+            }
+        }
+        if (sdl_cntrl == NULL) {
+			printf("[trngaje] sdl_cntrl is NULL\n");
+            return 1;
+        }
+	
+		printf("[trngaje] SDL_JoystickEventState=%d\n", SDL_JoystickEventState(SDL_ENABLE));
+		printf("[trngaje] SDL_GameControllerEventState=%d\n", SDL_GameControllerEventState(SDL_ENABLE));
+	}
+
+
+   SDL_DisplayMode DM;
+   SDL_GetCurrentDisplayMode(0, &DM);
+   printf("[trngaje] detected resolution = %d x %d\n", DM.w, DM.h);
+   g_screen_width = DM.w;
+   g_screen_height = DM.h;
+   
    // Create window
    #if FULLSCREEN == 1
-      g_window = SDL_CreateWindow(APP_NAME, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
+      g_window = SDL_CreateWindow(APP_NAME, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, g_screen_width, g_screen_height, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
    #else
-      g_window = SDL_CreateWindow(APP_NAME, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+      g_window = SDL_CreateWindow(APP_NAME, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, g_screen_width, g_screen_height, SDL_WINDOW_SHOWN);
    #endif
    if (g_window == NULL)
    {
